@@ -11,19 +11,34 @@ local theme = beautiful.get()
 local indicator = {}
 local function worker(args)
   local args = args or {}
-  local widget = wibox.container.background()
-  local wired = wibox.widget.imagebox()
-  local vpn = wibox.widget.imagebox()
-  local wired_na = wibox.widget.imagebox()
+
   -- Settings
   local interfaces = args.interfaces
   local ignore_interfaces = args.ignore_interfaces or {}
   local ICON_DIR = awful.util.getdir("config").."/"..module_path.."/net_widgets/icons/"
   local timeout = args.timeout or 10
-  local font = args.font or beautiful.font
+  local detail_font = args.font or beautiful.font
   local onclick = args.onclick
   local hidedisconnected = args.hidedisconnected
   local popup_position = args.popup_position or naughty.config.defaults.position
+
+  -- Set widgets
+  local widget = wibox.container.background()
+  local wired = wibox.widget.imagebox()
+  local vpn = wibox.widget.imagebox()
+  local wired_na = wibox.widget.imagebox()
+
+  wired:set_image(ICON_DIR.."wired.png")
+  wired_na:set_image(ICON_DIR.."wired_na.png")
+  vpn:set_image(ICON_DIR.."vpn.png")
+
+  if not (args.wired_textbox == nil) then 
+    wired = args.wired_textbox
+  end
+
+  if not (args.wired_na_textbox == nil) then
+    wired_na = args.wired_na_textbox
+  end
 
   -- Turn off advanced details by default
   if args.skiproutes == nil then
@@ -282,7 +297,7 @@ local function worker(args)
     local msg = ""
     for _, s in pairs(real_interfaces) do
       i = s.iface
-      msg = msg .. "\n<span font_desc=\"" .. font .. "\">"
+      msg = msg .. "\n<span font_desc=\"" .. detail_font .. "\">"
       msg = msg .. "┌[" .. s.iface .. "]"
       if s.is_vpn then
         if s.is_drvpn then
@@ -347,9 +362,6 @@ local function worker(args)
     return msg
   end  -- function text_grabber()
 
-  wired:set_image(ICON_DIR.."wired.png")
-  wired_na:set_image(ICON_DIR.."wired_na.png")
-  vpn:set_image(ICON_DIR.."vpn.png")
   widget:set_widget(wired_na)
   local function net_update()
     -- Refresh interface data
